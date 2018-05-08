@@ -99,7 +99,7 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 			'payment_mode'		=> $paymentMode,
 			'flp_checksum'		=> Mage::getModel('core/cookie')->get('flp_checksum'),
 			'source'			=> 'magento',
-			'source_version'	=> '1.2.4',
+			'source_version'	=> '1.2.5',
 		);
 
 		$shippingAddress = $order->getShippingAddress();
@@ -154,6 +154,12 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 					$order->setState(Mage_Sales_Model_Order::STATE_HOLDED, true)->save();
 					break;
 
+				case 'fraudlabs_pro_review':
+					if($order->getState() !== 'new') {
+						$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, $reviewStatus)->save();
+					}
+					break;
+
 			}
 		}
 
@@ -185,6 +191,12 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 					$order->setHoldBeforeState($order->getState());
 					$order->setHoldBeforeStatus($order->getStatus());
 					$order->setState(Mage_Sales_Model_Order::STATE_HOLDED, true)->save();
+					break;
+
+				case 'fraudlabs_pro_rejected':
+					if($order->getState() !== 'new') {
+						$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, $rejectStatus)->save();
+					}
 					break;
 
 			}
