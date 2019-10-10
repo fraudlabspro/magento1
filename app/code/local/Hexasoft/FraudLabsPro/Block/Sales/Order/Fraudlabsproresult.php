@@ -7,7 +7,13 @@ class Hexasoft_FraudLabsPro_Block_Sales_Order_Fraudlabsproresult extends Mage_Ad
 
 		$order = Mage::registry('current_order');
 
-		$data = unserialize($order->getfraudlabspro_response());
+		if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+			if($order->getfraudlabspro_response()){
+				$data = Mage::helper('core/unserializeArray')->unserialize($order->getfraudlabspro_response());
+			}
+		} else {
+			$data = json_decode($order->getfraudlabspro_response(), true);
+		}
 
 		if(filter_input(INPUT_GET, 'approve') || filter_input(INPUT_GET, 'reject') || filter_input(INPUT_GET, 'reject-blacklist')){
 			$data['fraudlabspro_status'] = (filter_input(INPUT_GET, 'approve')) ? 'APPROVE' : 'REJECT';
@@ -22,15 +28,13 @@ class Hexasoft_FraudLabsPro_Block_Sales_Order_Fraudlabsproresult extends Mage_Ad
 				if(is_null($result = json_decode($response, true)) === FALSE) break;
 			}
 
-			$order->setfraudlabspro_response(serialize($data))->save();
-
-			// die(header('Location: ' . substr(Mage::helper('core/url')->getCurrentUrl(), 0, strpos(Mage::helper('core/url')->getCurrentUrl(), '?'))));
+			$order->setfraudlabspro_response(json_encode($data))->save();
 		}
 
 		if(!$data) return '
 		<div class="entry-edit">
 			<div class="entry-edit-head" style="background:#cc0000;">
-				<h4 class="icon-head head-shipping-method"><a href="http://www.fraudlabspro.com" target="_blank"><img src="http://www.fraudlabspro.com/images/logo-small.png" width="163" height="20" border="0" align="absMiddle" /></a></h4>
+				<h4 class="icon-head head-shipping-method"><a href="https://www.fraudlabspro.com" target="_blank"><img src="https://www.fraudlabspro.com/images/logo-small.png" width="163" height="20" border="0" align="absMiddle" /></a></h4>
 			</div>
 
 			<fieldset>
@@ -78,7 +82,7 @@ class Hexasoft_FraudLabsPro_Block_Sales_Order_Fraudlabsproresult extends Mage_Ad
 		$out = '
 		<div class="entry-edit">
 			<div class="entry-edit-head" style="background:#cc0000; padding:5px;">
-				<h4 class="icon-head head-shipping-method"><a href="http://www.fraudlabspro.com" target="_blank"><img src="http://www.fraudlabspro.com/images/logo-small.png" width="163" height="20" border="0" align="absMiddle" /></a></h4>
+				<h4 class="icon-head head-shipping-method"><a href="https://www.fraudlabspro.com" target="_blank"><img src="https://www.fraudlabspro.com/images/logo-small.png" width="163" height="20" border="0" align="absMiddle" /></a></h4>
 			</div>
 
 			<fieldset>
@@ -102,7 +106,7 @@ class Hexasoft_FraudLabsPro_Block_Sales_Order_Fraudlabsproresult extends Mage_Ad
 			</tr>
 			<tr>
 				<td style="padding:5px;"><span><strong>IP Location</strong> <a href="javascript:;" title="Estimated location of the IP address.">[?]</a></span></td>
-				<td colspan="3" style="padding:5px;"><span>' . implode(', ', $location) . ' <a href="http://www.geolocation.com/' . $data['ip_address'] . '" target="_blank">[Map]</a></span></td>
+				<td colspan="3" style="padding:5px;"><span>' . implode(', ', $location) . ' <a href="https://www.geolocation.com/' . $data['ip_address'] . '" target="_blank">[Map]</a></span></td>
 				<td style="padding:5px;"><span><strong>IP Distance</strong> <a href="javascript:;" title="Distance from IP address to Billing Location.">[?]</a></span></td>
 				<td style="padding:5px;"><span>' . $data['distance_in_mile'] . ' Miles</span></td>
 			</tr>
@@ -193,7 +197,7 @@ class Hexasoft_FraudLabsPro_Block_Sales_Order_Fraudlabsproresult extends Mage_Ad
 
 	private function _case($s){
 		$s = ucwords(strtolower($s));
-		$s = preg_replace_callback("/( [ a-zA-Z]{1}')([a-zA-Z0-9]{1})/s",create_function('$matches','return $matches[1].strtoupper($matches[2]);'),$s);
+		$s = preg_replace_callback("/( [ a-zA-Z]{1}')([a-zA-Z0-9]{1})/s", function($matches){ return $matches[1].strtoupper($matches[2]); }, $s);
 		return $s;
 	}
 }

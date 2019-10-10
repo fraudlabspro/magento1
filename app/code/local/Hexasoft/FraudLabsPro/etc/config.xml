@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Hexasoft_FraudLabsPro>
-			<version>1.2.6</version>
+			<version>1.3.0</version>
 		</Hexasoft_FraudLabsPro>
 	</modules>
 
@@ -99,6 +99,7 @@
 				<api_key></api_key>
 				<review_status>holded</review_status>
 				<reject_status>canceled</reject_status>
+				<enable_notification_on></enable_notification_on>
 			</basic_settings>
 		</fraudlabspro>
 	</default>

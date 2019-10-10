@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <config>
-	<tabs>
+    <tabs>
         <fraudlabspro translate="label" module="fraudlabspro">
             <label>FraudLabs Pro</label>
             <sort_order>200</sort_order>
         </fraudlabspro>
     </tabs>
     <sections>
-		<fraudlabspro translate="label" module="fraudlabspro">
-			<class>separator-top</class>
+        <fraudlabspro translate="label" module="fraudlabspro">
+            <class>separator-top</class>
             <label>Settings</label>
             <tab>fraudlabspro</tab>
             <sort_order>130</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
-			<groups>
+            <groups>
                 <basic_settings translate="label">
-					<label>FraudLabs Pro</label>
+                    <label>FraudLabs Pro</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-						<active translate="label">
+                        <active translate="label">
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
@@ -33,16 +33,16 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </active>
-						<api_key translate="label">
+                        <api_key translate="label">
                             <label>API Key</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-							<comment><![CDATA[You can register for a free license key at <a href="http://www.fraudlabspro.com/sign-up?r=magento" target="_blank">http://www.fraudlabspro.com/sign-up</a> if you do not have one.]]></comment>
+                            <comment><![CDATA[You can register for a free license key at <a href="https://www.fraudlabspro.com/sign-up?r=magento" target="_blank">https://www.fraudlabspro.com/sign-up</a> if you do not have one.]]></comment>
                         </api_key>
-						<review_status translate="label">
+                        <review_status translate="label">
                             <label>When receive Review status, change order status to</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_order_status</source_model>
@@ -50,9 +50,9 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-							<comment><![CDATA[Don't select any option to leave your order unchanged.]]></comment>
+                            <comment><![CDATA[Don't select any option to leave your order unchanged.]]></comment>
                         </review_status>
-						<reject_status translate="label">
+                        <reject_status translate="label">
                             <label>When receive Reject status, change order status to</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_order_status</source_model>
@@ -60,11 +60,21 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-							<comment><![CDATA[Don't select any option to leave your order unchanged.]]></comment>
+                            <comment><![CDATA[Don't select any option to leave your order unchanged.]]></comment>
                         </reject_status>
+                        <enable_notification_on translate="label">
+                            <label>Enable notification on</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>fraudlabspro/system_config_source_view</source_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[You can trigger notification, such as email sending, using Zapier service. Please configure the integration in Zapier.com before enabling the options. You can visit <a href="https://www.fraudlabspro.com/resources/tutorials/how-to-enable-notification-using-zapier-in-magento1/" target="_blank">https://www.fraudlabspro.com/resources/tutorials/how-to-enable-notification-using-zapier-in-magento1/</a> for details on how to enable the zap.]]></comment>
+                        </enable_notification_on>
                     </fields>
                 </basic_settings>
-			</groups>
-		</fraudlabspro>
-	</sections>
+            </groups>
+        </fraudlabspro>
+    </sections>
 </config>

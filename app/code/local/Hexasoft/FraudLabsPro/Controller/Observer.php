@@ -38,9 +38,7 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 		if(empty($orderId))
 			return true;
 
-		$data = unserialize($order->getfraudlabspro_response());
-
-		if($data)
+		if($order->getfraudlabspro_response())
 			return true;
 
 		if(isset($_SERVER['DEV_MODE'])) $_SERVER['REMOTE_ADDR'] = '175.143.8.154';
@@ -48,6 +46,7 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 		$apiKey = Mage::getStoreConfig('fraudlabspro/basic_settings/api_key');
 		$reviewStatus = Mage::getStoreConfig('fraudlabspro/basic_settings/review_status');
 		$rejectStatus = Mage::getStoreConfig('fraudlabspro/basic_settings/reject_status');
+		$notificationOn = Mage::getStoreConfig('fraudlabspro/basic_settings/enable_notification_on');
 
 		$billingAddress = $order->getBillingAddress();
 
@@ -121,7 +120,7 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 			'payment_mode'		=> $paymentMode,
 			'flp_checksum'		=> Mage::getModel('core/cookie')->get('flp_checksum'),
 			'source'			=> 'magento',
-			'source_version'	=> '1.2.6',
+			'source_version'	=> '1.3.0',
 		);
 
 		$shippingAddress = $order->getShippingAddress();
@@ -144,7 +143,7 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 		$result['ip_address'] = $queries['ip'];
 		$result['api_key'] = $apiKey;
 
-		$order->setfraudlabspro_response(serialize($result))->save();
+		$order->setfraudlabspro_response(json_encode($result))->save();
 
 		if($result['fraudlabspro_status'] == 'REVIEW'){
 			switch($reviewStatus){
@@ -224,6 +223,29 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 			}
 		}
 
+		if(((strpos($notificationOn, 'approve') !== FALSE) && $result['fraudlabspro_status'] == 'APPROVE') || ((strpos($notificationOn, 'review') !== FALSE) && $result['fraudlabspro_status'] == 'REVIEW') || ((strpos($notificationOn, 'reject') !== FALSE) && $result['fraudlabspro_status'] == 'REJECT')) {
+			// Use zaptrigger API to get zap information
+			$zapresponse = $this->http('https://api.fraudlabspro.com/v1/zaptrigger?' . http_build_query(array(
+				'key'		=> $apiKey,
+				'format'	=> 'json',
+			)));
+
+			if(is_null($zapresult = json_decode($zapresponse, true)) === FALSE) {
+				$target_url = $zapresult['target_url'];
+			}
+
+			if(!empty($target_url)){
+				$this->zaphttp($target_url, [
+					'id'			=> $result['fraudlabspro_id'],
+					'date_created'	=> gmdate('Y-m-d H:i:s'),
+					'flp_status'	=> $result['fraudlabspro_status'],
+					'full_name'		=> $order->getCustomerFirstname() . ' ' . $order->getCustomerLastname(),
+					'email'			=> $order->getCustomerEmail(),
+					'order_id'		=> $orderId,
+				]);
+			}
+		}
+
 		Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('fraudlabspro')->__('FraudLabs Pro Request sent.'));
 		return true;
 	}
@@ -244,6 +266,38 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 		if(!curl_errno($ch)) return $result;
 
 		curl_close($ch);
+
+		return false;
+	}
+
+	private function zaphttp($url, $fields = ''){
+		$ch = curl_init();
+
+		if ($fields) {
+			$data_string = json_encode($fields);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+		}
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($ch, CURLOPT_HTTP_VERSION, '1.1');
+		curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json',
+			'Content-Length: ' . strlen($data_string))
+		);
+
+		$response = curl_exec($ch);
+
+		if (!curl_errno($ch)) {
+			return $response;
+		}
 
 		return false;
 	}
