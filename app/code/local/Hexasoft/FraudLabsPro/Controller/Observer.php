@@ -81,6 +81,18 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 			}
 		}
 
+		$item_sku = '';
+		$qty = 0;
+		$items = $order->getAllItems();
+		foreach ($items as $item) {
+			$product_sku = Mage::getModel('catalog/product')->load($item->getProductId())->getSku();
+			if ($product_sku != '') {
+				$item_sku .= $product_sku . ':' . $item->getQtyOrdered() . ',';
+			}
+			$qty += $item->getQtyOrdered();
+		}
+		$item_sku = rtrim($item_sku, ',');
+
 		$payment_mode = $order->getPayment()->getMethod();
 		if($payment_mode === 'ccsave'){
 			$paymentMode = 'creditcard';
@@ -113,14 +125,15 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 			'email'				=> $order->getCustomerEmail(),
 			'user_phone'		=> $billingAddress->getTelephone(),
 			'amount'			=> $order->getBaseGrandTotal(),
-			'quantity'			=> count($order->getAllItems()),
+			'quantity'			=> $qty,
 			'currency'			=> Mage::app()->getStore()->getCurrentCurrencyCode(),
 			'user_order_id'		=> $orderId,
 			'magento_order_id'	=> $order->getEntityId(),
 			'payment_mode'		=> $paymentMode,
 			'flp_checksum'		=> Mage::getModel('core/cookie')->get('flp_checksum'),
 			'source'			=> 'magento',
-			'source_version'	=> '1.3.0',
+			'source_version'	=> '1.4.0',
+			'items'				=> $item_sku,
 		);
 
 		$shippingAddress = $order->getShippingAddress();
