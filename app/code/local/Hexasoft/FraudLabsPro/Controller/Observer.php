@@ -132,7 +132,7 @@ class Hexasoft_FraudLabsPro_Controller_Observer{
 			'payment_mode'		=> $paymentMode,
 			'flp_checksum'		=> Mage::getModel('core/cookie')->get('flp_checksum'),
 			'source'			=> 'magento',
-			'source_version'	=> '1.4.0',
+			'source_version'	=> '1.4.1',
 			'items'				=> $item_sku,
 		);
 
